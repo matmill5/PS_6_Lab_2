@@ -18,9 +18,19 @@ ros::ServiceClient client;
 void currStateCallback(const nav_msgs::Odometry &odom)
 {
     current_state = odom;
-    current_state.pose.pose.orientation.z = -current_state.pose.pose.orientation.z;
-    current_state.pose.pose.position.y = -current_state.pose.pose.position.y;
     current_pose.pose = current_state.pose.pose;
+}
+
+void stop(){
+    mobot_controller::ServiceMsg srv;
+    srv.request.start_pos = current_pose;
+    srv.request.goal_pos = current_pose;
+    srv.request.mode = "0"; 
+    if (client.call(srv))
+    {
+        ROS_INFO("STOP");
+    }
+    ROS_INFO("STOP2");
 }
 
 bool move2coord(float goal_pose_x, float goal_pose_y)
@@ -140,6 +150,8 @@ int main(int argc, char **argv)
     ROS_INFO("STEP: Reorienting back to original pose");
     tryMove(x_current + 0.01, y_current, 1);
 
+    // stop everything
+    stop();
     // ROS_INFO("STEP 5");
     // tryMove(-8, current_pose.pose.position.y - 0.05, 1);
 

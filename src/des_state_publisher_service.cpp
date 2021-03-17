@@ -22,6 +22,7 @@ int s = -1; // this is unreal. state start with 1 for forward.
 //ros::Publisher des_state_pub;
 //ros::ServiceServer des_state_service;
 
+const int STOP = 0;
 const int FORWARD = 1;
 const int SPIN = 2;
 const int HALT = 3;
@@ -62,10 +63,10 @@ bool desStateServiceCallBack(mobot_controller::ServiceMsgRequest &request,
     ros::Rate looprate(1 / dt);
     TrajBuilder trajBuilder;
     trajBuilder.set_dt(dt);
-    trajBuilder.set_alpha_max(0.1);
-    trajBuilder.set_accel_max(0.1);
-    trajBuilder.set_omega_max(0.1*10);
-    trajBuilder.set_speed_max(0.6);
+    trajBuilder.set_alpha_max(0.2);
+    trajBuilder.set_accel_max(0.2);
+    trajBuilder.set_omega_max(1);
+    trajBuilder.set_speed_max(1);
 
     // calculate the desired state stream using traj_builder lib.
     nav_msgs::Odometry des_state;
@@ -80,9 +81,17 @@ bool desStateServiceCallBack(mobot_controller::ServiceMsgRequest &request,
 
     switch (s)
     {
+    case STOP:
+        des_state.pose.covariance[0] = STOP;
+        des_state.twist.twist.angular.z = 0.0;
+        des_state.twist.twist.linear.x = 0.0;
+        des_state.header.stamp = ros::Time::now();
+        des_state_pub.publish(des_state);
+        ros::spinOnce();
+        break;
 
     // GOING FORWARD
-    case 1:
+    case FORWARD:
         ROS_INFO("GOING FORWARD");
         trajBuilder.build_travel_traj(g_start_pose, g_end_pose, vec_of_states);
         for (auto state : vec_of_states)
@@ -102,7 +111,7 @@ bool desStateServiceCallBack(mobot_controller::ServiceMsgRequest &request,
         return response.success = true;
 
     // SPIN
-    case 2:
+    case SPIN:
         ROS_INFO("GOING SPIN");
         trajBuilder.build_spin_traj(g_start_pose, g_end_pose, vec_of_states);
         for (auto state : vec_of_states)
@@ -117,7 +126,7 @@ bool desStateServiceCallBack(mobot_controller::ServiceMsgRequest &request,
         return response.success = true;
 
     // BRAKE - HALT!!!!!!!!
-    case 3:
+    case HALT:
         ROS_INFO("BRAKEEEEEEEEE");
         trajBuilder.build_braking_traj(g_start_pose, current_state.twist.twist, vec_of_states);
         for (auto state : vec_of_states)
