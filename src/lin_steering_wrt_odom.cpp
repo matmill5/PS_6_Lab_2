@@ -237,8 +237,8 @@ void SteeringController::lin_steering_algorithm()
         controller_omega = 0;
 
     case FORWARD:
-        controller_speed = des_state_vel_;// + K_TRIP_DIST * trip_dist_err; //speed up/slow down to null out
-        controller_omega = 0; //des_state_omega_ + K_PHI * heading_err + K_DISP * lateral_err;
+        controller_speed = des_state_vel_ + K_TRIP_DIST * trip_dist_err; //speed up/slow down to null out
+        controller_omega = des_state_omega_ + K_PHI * heading_err + K_DISP * lateral_err;
 
         controller_omega = MAX_OMEGA * sat(controller_omega / MAX_OMEGA); // saturate omega command at specified limits
         break;
