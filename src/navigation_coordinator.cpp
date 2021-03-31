@@ -138,7 +138,8 @@ int main(int argc, char **argv)
     y_i = current_pose.pose.position.y;
 
     ROS_INFO("STEP 2");
-    tryMove(x_i, y_i -1, 1);
+
+    tryMove(x_i, y_i + 1, 1);
 
     x_i = current_pose.pose.position.x;
     y_i = current_pose.pose.position.y;
@@ -150,7 +151,8 @@ int main(int argc, char **argv)
     y_i = current_pose.pose.position.y;
 
     ROS_INFO("STEP 4");
-    tryMove(x_i, y_i + 1, 1);
+
+    tryMove(x_i, y_i - 1, 1);
 
     // orientation fix: rotate after final translation.
     ros::spinOnce();
